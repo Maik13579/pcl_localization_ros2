@@ -16,6 +16,11 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     # Arguments    
+    node_name_arg = DeclareLaunchArgument(
+        'node_name',
+        description='Node name',
+        default_value='pcl_localization'
+    )
     cloud_topic_arg = DeclareLaunchArgument(
         'cloud_topic',
         description='PointCloud2 topic',
@@ -42,6 +47,7 @@ def generate_launch_description():
         default_value='/imu/data'
     )
 
+    node_name = LaunchConfiguration('node_name')
     cloud_topic = LaunchConfiguration('cloud_topic')
     map_topic = LaunchConfiguration('map_topic')
     initial_pose_topic = LaunchConfiguration('initial_pose_topic')
@@ -57,7 +63,7 @@ def generate_launch_description():
 
     # Nodes
     pcl_localization = LifecycleNode(
-        name='pcl_localization',
+        name=node_name,
         namespace='',
         package='pcl_localization_ros2',
         executable='pcl_localization_node',
@@ -104,6 +110,7 @@ def generate_launch_description():
             ],
         )
     )
+    ld.add_action(node_name_arg)
     ld.add_action(cloud_topic_arg)
     ld.add_action(map_topic_arg)
     ld.add_action(initial_pose_topic_arg)
