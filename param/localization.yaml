@@ -20,4 +20,6 @@
       initial_pose_qw: 1.0
       use_odom: false
       use_imu: false
+      use_init_tf: true
+      init_tf_frame: "odom"
       enable_debug: false

@@ -44,6 +44,8 @@ Green: path, Red: map
 |initial_pose_qw|double|1.0|Quaternion w of the initial pose value|
 |use_odom|bool|false|whether odom is used or not for initial attitude in point cloud registration|
 |use_imu|bool|false|whether 9-axis imu is used or not for point cloud distortion correction|
+|use_init_tf|bool|false|wheter to use an tf frame as an initial guess or not|
+|init_tf_frame|string|"odom"|frame name of the inital guess frame|
 |enable_debug|bool|false|whether debug is done or not|
 
 ## demo
