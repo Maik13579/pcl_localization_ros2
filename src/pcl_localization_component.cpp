@@ -450,6 +450,12 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
   transform_stamped.transform.rotation = quat_msg;
   broadcaster_.sendTransform(transform_stamped);
 
+  corrent_pose_stamped_.header.stamp = msg->header.stamp;
+  corrent_pose_stamped_.pose.position.x = static_cast<double>(final_transformation(0, 3));
+  corrent_pose_stamped_.pose.position.y = static_cast<double>(final_transformation(1, 3));
+  corrent_pose_stamped_.pose.position.z = static_cast<double>(final_transformation(2, 3));
+  corrent_pose_stamped_.pose.orientation = quat_msg;
+
   if (use_init_tf_) {
     // Get the transformation from init_tf_frame_ to the original frame
     geometry_msgs::msg::TransformStamped tf_transform;
@@ -474,23 +480,18 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
     Eigen::Quaterniond quat_eig_final(rot_mat_final);
     geometry_msgs::msg::Quaternion quat_msg_final = tf2::toMsg(quat_eig_final);
 
-    corrent_pose_stamped_.header.stamp = msg->header.stamp;
-    corrent_pose_stamped_.pose.position.x = static_cast<double>(final_transformation_with_init_transform(0, 3));
-    corrent_pose_stamped_.pose.position.y = static_cast<double>(final_transformation_with_init_transform(1, 3));
-    corrent_pose_stamped_.pose.position.z = static_cast<double>(final_transformation_with_init_transform(2, 3));
-    corrent_pose_stamped_.pose.orientation = quat_msg_final;
-    pose_pub_->publish(corrent_pose_stamped_);
+    geometry_msgs::msg::PoseStamped corrent_pose_stamped_transformed_;
+    corrent_pose_stamped_transformed_.header.stamp = msg->header.stamp;
+    corrent_pose_stamped_transformed_.pose.position.x = static_cast<double>(final_transformation_with_init_transform(0, 3));
+    corrent_pose_stamped_transformed_.pose.position.y = static_cast<double>(final_transformation_with_init_transform(1, 3));
+    corrent_pose_stamped_transformed_.pose.position.z = static_cast<double>(final_transformation_with_init_transform(2, 3));
+    corrent_pose_stamped_transformed_.pose.orientation = quat_msg_final;
 
-    path_.poses.push_back(corrent_pose_stamped_);
+    pose_pub_->publish(corrent_pose_stamped_transformed_);
+    path_.poses.push_back(corrent_pose_stamped_transformed_);
     path_pub_->publish(path_);
   } else {
-    corrent_pose_stamped_.header.stamp = msg->header.stamp;
-    corrent_pose_stamped_.pose.position.x = static_cast<double>(final_transformation(0, 3));
-    corrent_pose_stamped_.pose.position.y = static_cast<double>(final_transformation(1, 3));
-    corrent_pose_stamped_.pose.position.z = static_cast<double>(final_transformation(2, 3));
-    corrent_pose_stamped_.pose.orientation = quat_msg;
     pose_pub_->publish(corrent_pose_stamped_);
-
     path_.poses.push_back(corrent_pose_stamped_);
     path_pub_->publish(path_);
   }
