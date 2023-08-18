@@ -22,13 +22,7 @@ def generate_launch_description():
 
     ld = launch.LaunchDescription()
 
-    # Arguments
-    cloud_topic = LaunchConfiguration('cloud_topic')
-    map_topic = LaunchConfiguration('map_topic')
-    initial_pose_topic = LaunchConfiguration('initial_pose_topic')
-    odom_topic = LaunchConfiguration('odom_topic')
-    imu_topic = LaunchConfiguration('imu_topic')
-    
+    # Arguments    
     cloud_topic_arg = DeclareLaunchArgument(
         'cloud_topic',
         description='PointCloud2 topic',
@@ -54,6 +48,12 @@ def generate_launch_description():
         description='IMU topic',
         default_value='/imu/data'
     )
+
+    cloud_topic = LaunchConfiguration('cloud_topic')
+    map_topic = LaunchConfiguration('map_topic')
+    initial_pose_topic = LaunchConfiguration('initial_pose_topic')
+    odom_topic = LaunchConfiguration('odom_topic')
+    imu_topic = LaunchConfiguration('imu_topic')
 
     # Nodes
     lidar_tf = launch_ros.actions.Node(
@@ -125,18 +125,16 @@ def generate_launch_description():
             ],
         )
     )
-    
-    ld.add_action(from_unconfigured_to_inactive)
-    ld.add_action(from_inactive_to_active)
-    
-    ld.add_action(pcl_localization)
-    ld.add_action(lidar_tf)
-    ld.add_action(to_inactive)
-
     ld.add_action(cloud_topic_arg)
     ld.add_action(map_topic_arg)
     ld.add_action(initial_pose_topic_arg)
     ld.add_action(odom_topic_arg)
     ld.add_action(imu_topic_arg)
 
+    ld.add_action(from_unconfigured_to_inactive)
+    ld.add_action(from_inactive_to_active)
+    
+    ld.add_action(pcl_localization)
+    ld.add_action(lidar_tf)
+    ld.add_action(to_inactive)
     return ld
