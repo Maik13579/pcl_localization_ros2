@@ -473,7 +473,7 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
 
     // Combine the transformations
     Eigen::Matrix4f final_transformation_with_init_transform = registration_->getFinalTransformation();
-    final_transformation_with_init_transform = tf_matrix * final_transformation_with_init_transform;
+    final_transformation_with_init_transform = final_transformation_with_init_transform * tf_matrix;
 
     // update Rotation
     Eigen::Matrix3d rot_mat_final = final_transformation_with_init_transform.block<3, 3>(0, 0).cast<double>();
