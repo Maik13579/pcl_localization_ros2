@@ -29,8 +29,7 @@ PCLLocalization::PCLLocalization(const rclcpp::NodeOptions & options)
   declare_parameter("initial_pose_qw", 1.0);
   declare_parameter("use_odom", false);
   declare_parameter("use_imu", false);
-  declare_parameter("use_init_tf", false);
-  declare_parameter("init_tf_frame", "odom");
+  declare_parameter("use_odom_tf", false);
   declare_parameter("enable_debug", false);
 }
 
@@ -163,8 +162,7 @@ void PCLLocalization::initializeParameters()
   get_parameter("initial_pose_qw", initial_pose_qw_);
   get_parameter("use_odom", use_odom_);
   get_parameter("use_imu", use_imu_);
-  get_parameter("use_init_tf", use_init_tf_);
-  get_parameter("init_tf_frame", init_tf_frame_);
+  get_parameter("use_odom_tf", use_odom_tf_);
   get_parameter("enable_debug", enable_debug_);
 
   RCLCPP_INFO(get_logger(),"global_frame_id: %s", global_frame_id_.c_str());
@@ -183,8 +181,7 @@ void PCLLocalization::initializeParameters()
   RCLCPP_INFO(get_logger(),"set_initial_pose: %d", set_initial_pose_);
   RCLCPP_INFO(get_logger(),"use_odom: %d", use_odom_);
   RCLCPP_INFO(get_logger(),"use_imu: %d", use_imu_);
-  RCLCPP_INFO(get_logger(),"use_init_tf: %d", use_init_tf_);
-  RCLCPP_INFO(get_logger(),"init_tf_frame: %s", init_tf_frame_.c_str());
+  RCLCPP_INFO(get_logger(),"use_odom_tf: %d", use_odom_tf_);
   RCLCPP_INFO(get_logger(),"enable_debug: %d", enable_debug_);
 }
 
@@ -400,14 +397,14 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
     }
   }
 
-  if (use_init_tf_) {
-    // Transform the filtered and pruned point cloud into the inital tf frame.
+  if (use_odom_tf_) {
+    // Transform the filtered and pruned point cloud into the odom frame.
     sensor_msgs::msg::PointCloud2 pruned_cloud_ros;
     pcl::toROSMsg(tmp, pruned_cloud_ros);
     sensor_msgs::msg::PointCloud2 transformed_cloud;
     try {
       pruned_cloud_ros.header.frame_id = msg->header.frame_id; //Set the header of the pointcloud to the original frame
-      tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, init_tf_frame_, tf2::durationFromSec(0.1));
+      tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, odom_frame_id_, tf2::durationFromSec(0.1));
     } catch (tf2::TransformException &ex) {
       RCLCPP_WARN(get_logger(), "%s", ex.what());
       return;
@@ -456,11 +453,11 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
   corrent_pose_stamped_.pose.position.z = static_cast<double>(final_transformation(2, 3));
   corrent_pose_stamped_.pose.orientation = quat_msg;
 
-  if (use_init_tf_) {
-    // Get the transformation from init_tf_frame_ to the original frame
+  if (use_odom_tf_) {
+    // Get the transformation from odom frame to the original frame
     geometry_msgs::msg::TransformStamped tf_transform;
     try {
-        tf_transform = tfbuffer_.lookupTransform(init_tf_frame_, msg->header.frame_id, msg->header.stamp, tf2::durationFromSec(0.1));
+        tf_transform = tfbuffer_.lookupTransform(odom_frame_id_, msg->header.frame_id, msg->header.stamp, tf2::durationFromSec(0.1));
     } catch (tf2::TransformException &ex) {
         RCLCPP_WARN(get_logger(), "%s", ex.what());
         return;
