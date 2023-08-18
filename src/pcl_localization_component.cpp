@@ -480,6 +480,7 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
     Eigen::Quaterniond quat_eig_final(rot_mat_final);
     geometry_msgs::msg::Quaternion quat_msg_final = tf2::toMsg(quat_eig_final);
 
+    // Create updated pose message
     geometry_msgs::msg::PoseStamped corrent_pose_stamped_transformed_;
     corrent_pose_stamped_transformed_.header.stamp = msg->header.stamp;
     corrent_pose_stamped_transformed_.pose.position.x = static_cast<double>(final_transformation_with_init_transform(0, 3));
@@ -487,6 +488,7 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
     corrent_pose_stamped_transformed_.pose.position.z = static_cast<double>(final_transformation_with_init_transform(2, 3));
     corrent_pose_stamped_transformed_.pose.orientation = quat_msg_final;
 
+    // Publish the updated pose
     pose_pub_->publish(corrent_pose_stamped_transformed_);
     path_.poses.push_back(corrent_pose_stamped_transformed_);
     path_pub_->publish(path_);
@@ -495,8 +497,6 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
     path_.poses.push_back(corrent_pose_stamped_);
     path_pub_->publish(path_);
   }
-
-
 
   if (enable_debug_) {
     std::cout << "number of filtered cloud points: " << filtered_cloud_ptr->size() << std::endl;
