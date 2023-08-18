@@ -1,5 +1,8 @@
 /**:
     ros__parameters:
+      global_frame_id: "map"
+      odom_frame_id: "odom"
+      base_frame_id: "base_link"
       registration_method: "NDT"
       ndt_resolution: 3.0
       ndt_step_size: 0.1
