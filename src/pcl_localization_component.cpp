@@ -399,7 +399,24 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
       tmp.push_back(p);
     }
   }
-  pcl::PointCloud<pcl::PointXYZI>::Ptr tmp_ptr(new pcl::PointCloud<pcl::PointXYZI>(tmp));
+
+  if (use_init_tf_) {
+    // Transform the filtered and pruned point cloud into the inital tf frame.
+    sensor_msgs::msg::PointCloud2 pruned_cloud_ros;
+    pcl::toROSMsg(tmp, pruned_cloud_ros);
+    sensor_msgs::msg::PointCloud2 transformed_cloud;
+    try {
+      pruned_cloud_ros.header.frame_id = msg->header.frame_id; //Set the header of the pointcloud to the original frame
+      tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, init_tf_frame_, tf2::durationFromSec(0.1));
+    } catch (tf2::TransformException &ex) {
+      RCLCPP_WARN(get_logger(), "%s", ex.what());
+      return;
+    }
+  pcl::PointCloud<pcl::PointXYZI>::Ptr tmp_ptr(new pcl::PointCloud<pcl::PointXYZI>(transformed_cloud));
+  } else {
+    pcl::PointCloud<pcl::PointXYZI>::Ptr tmp_ptr(new pcl::PointCloud<pcl::PointXYZI>(tmp));
+  }
+
   registration_->setInputSource(tmp_ptr);
 
   Eigen::Affine3d affine;
