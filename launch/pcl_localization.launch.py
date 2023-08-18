@@ -9,6 +9,8 @@ import launch_ros.actions
 import launch_ros.events
 
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import LifecycleNode
 from launch_ros.actions import Node
 
@@ -20,6 +22,40 @@ def generate_launch_description():
 
     ld = launch.LaunchDescription()
 
+    # Arguments
+    cloud_topic = LaunchConfiguration('cloud_topic')
+    map_topic = LaunchConfiguration('map_topic')
+    initial_pose_topic = LaunchConfiguration('initial_pose_topic')
+    odom_topic = LaunchConfiguration('odom_topic')
+    imu_topic = LaunchConfiguration('imu_topic')
+    
+    cloud_topic_arg = DeclareLaunchArgument(
+        'cloud_topic',
+        description='PointCloud2 topic',
+        default_value='/velodyne_points'
+    )
+    map_topic_arg = DeclareLaunchArgument(
+        'map_topic',
+        description='PointCloud2 map topic',
+        default_value='/map'
+    )
+    initial_pose_topic_arg = DeclareLaunchArgument(
+        'initial_pose_topic',
+        description='Initial pose topic',
+        default_value='/initialpose'
+    )
+    odom_topic_arg = DeclareLaunchArgument(
+        'odom_topic',
+        description='Odometry topic',
+        default_value='/odom'
+    )
+    imu_topic_arg = DeclareLaunchArgument(
+        'imu_topic',
+        description='IMU topic',
+        default_value='/imu/data'
+    )
+
+    # Nodes
     lidar_tf = launch_ros.actions.Node(
         name='lidar_tf',
         package='tf2_ros',
@@ -46,7 +82,11 @@ def generate_launch_description():
         namespace='',
         package='pcl_localization_ros2',
         executable='pcl_localization_node',
-        remappings=[('/cloud','/points_raw')],
+        remappings=[('/cloud', cloud_topic),
+                    ('/map', map_topic),
+                    ('/initial_pose', initial_pose_topic),
+                    ('/odom', odom_topic),
+                    ('/imu', imu_topic)],
         parameters=[localization_param_dir],
         output='screen')
 
@@ -92,5 +132,11 @@ def generate_launch_description():
     ld.add_action(pcl_localization)
     ld.add_action(lidar_tf)
     ld.add_action(to_inactive)
+
+    ld.add_action(cloud_topic_arg)
+    ld.add_action(map_topic_arg)
+    ld.add_action(initial_pose_topic_arg)
+    ld.add_action(odom_topic_arg)
+    ld.add_action(imu_topic_arg)
 
     return ld
