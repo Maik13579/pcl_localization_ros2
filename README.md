@@ -20,6 +20,15 @@ Green: path, Red: map
 /path (nav_msgs/Path)  
 /initial_map (sensor_msgs/PointCloud2)(when `use_pcd_map` is true)  
 
+## Launchfile arguments
+|Name|Type|Default value|Description|
+|---|---|---|---|
+|cloud_topic|string|"/velodyne_points"|Topic name to remap input cloud|
+|map_topic|string|"/map"|Topic name to remap input map|
+|initial_pose_topic|string|"/initialpose"|Topic name to remap input initialpose|
+|odom_topic|string|"/odom"|Topic name to remap input odom|
+|imu_topic|string|"/imu"|Topic name to remap input imu|
+
 ## params
 
 |Name|Type|Default value|Description|
