@@ -8,12 +8,11 @@ from launch.actions import DeclareLaunchArgument, EmitEvent, LogInfo, RegisterEv
 from launch.events import matches_action
 from launch.substitutions import LaunchConfiguration
 
-from launch_ros.actions import LifecycleNode, Node
+from launch_ros.actions import LifecycleNode
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.events.lifecycle import ChangeState
 
 def generate_launch_description():
-
     ld = LaunchDescription()
 
     # Arguments    
@@ -57,20 +56,6 @@ def generate_launch_description():
             'localization.yaml'))
 
     # Nodes
-    lidar_tf = Node(
-        name='lidar_tf',
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        arguments=['0','0','0','0','0','0','1','odom','velodyne']
-        )
-    
-    imu_tf = Node(
-        name='imu_tf',
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        arguments=['0','0','0','0','0','0','1','odom','imu_link']
-        )
-
     pcl_localization = LifecycleNode(
         name='pcl_localization',
         namespace='',
@@ -129,6 +114,5 @@ def generate_launch_description():
     ld.add_action(from_inactive_to_active)
     
     ld.add_action(pcl_localization)
-    ld.add_action(lidar_tf)
     ld.add_action(to_inactive)
     return ld
