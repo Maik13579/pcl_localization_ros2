@@ -28,6 +28,9 @@ Green: path, Red: map
 |initial_pose_topic|string|"/initialpose"|Topic name to remap input initialpose|
 |odom_topic|string|"/odom"|Topic name to remap input odom|
 |imu_topic|string|"/imu"|Topic name to remap input imu|
+|pcl_pose_topic|string|"/pcl_pose"|Topic name to remap output pose|
+|path_topic|string|"/path"|Topic to remap output path|
+|initial_map_topic|string|"/initial_map"|Topic to remap output initial_map|
 
 ## params
 
