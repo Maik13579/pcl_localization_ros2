@@ -29,6 +29,8 @@ PCLLocalization::PCLLocalization(const rclcpp::NodeOptions & options)
   declare_parameter("initial_pose_qw", 1.0);
   declare_parameter("use_odom", false);
   declare_parameter("use_imu", false);
+  declare_parameter("use_init_tf", false);
+  declare_parameter("init_tf_frame", "odom");
   declare_parameter("enable_debug", false);
 }
 
@@ -161,6 +163,8 @@ void PCLLocalization::initializeParameters()
   get_parameter("initial_pose_qw", initial_pose_qw_);
   get_parameter("use_odom", use_odom_);
   get_parameter("use_imu", use_imu_);
+  get_parameter("use_init_tf", use_init_tf_);
+  get_parameter("init_tf_frame", init_tf_frame_);
   get_parameter("enable_debug", enable_debug_);
 
   RCLCPP_INFO(get_logger(),"global_frame_id: %s", global_frame_id_.c_str());
@@ -179,6 +183,8 @@ void PCLLocalization::initializeParameters()
   RCLCPP_INFO(get_logger(),"set_initial_pose: %d", set_initial_pose_);
   RCLCPP_INFO(get_logger(),"use_odom: %d", use_odom_);
   RCLCPP_INFO(get_logger(),"use_imu: %d", use_imu_);
+  RCLCPP_INFO(get_logger(),"use_init_tf: %d", use_init_tf_);
+  RCLCPP_INFO(get_logger(),"init_tf_frame: %s", init_tf_frame_.c_str());
   RCLCPP_INFO(get_logger(),"enable_debug: %d", enable_debug_);
 }
 

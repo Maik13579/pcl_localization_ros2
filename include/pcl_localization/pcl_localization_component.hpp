@@ -111,6 +111,8 @@ public:
   bool use_odom_{false};
   double last_odom_received_time_;
   bool use_imu_{false};
+  bool use_init_tf_{false};
+  std::string init_tf_frame_;
   bool enable_debug_{false};
 
   // imu
