@@ -462,7 +462,7 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
 
       // Convert the transform message to Eigen matrix
       Eigen::Affine3d tf_affine;
-      tf2::fromMsg(tf_transform.transform, tf_affine);
+      tf_affine =  tf2::transformToEigen(tf_transform.transform);
       Eigen::Matrix4f tf_matrix = tf_affine.matrix().cast<float>();
 
       // Combine the transformations
