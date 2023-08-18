@@ -1,26 +1,20 @@
 import os
 
-import launch
-import launch.actions
-import launch.events
-
-import launch_ros
-import launch_ros.actions
-import launch_ros.events
-
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import LifecycleNode
-from launch_ros.actions import Node
-
+from ament_index_python.packages import get_package_share_directory
 import lifecycle_msgs.msg
 
-from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, EmitEvent, LogInfo, RegisterEventHandler
+from launch.events import matches_action
+from launch.substitutions import LaunchConfiguration
+
+from launch_ros.actions import LifecycleNode, Node
+from launch_ros.event_handlers import OnStateTransition
+from launch_ros.events.lifecycle import ChangeState
 
 def generate_launch_description():
 
-    ld = launch.LaunchDescription()
+    ld = LaunchDescription()
 
     # Arguments    
     cloud_topic_arg = DeclareLaunchArgument(
@@ -55,29 +49,29 @@ def generate_launch_description():
     odom_topic = LaunchConfiguration('odom_topic')
     imu_topic = LaunchConfiguration('imu_topic')
 
+    localization_param_dir = LaunchConfiguration(
+        'localization_param_dir',
+        default=os.path.join(
+            get_package_share_directory('pcl_localization_ros2'),
+            'param',
+            'localization.yaml'))
+
     # Nodes
-    lidar_tf = launch_ros.actions.Node(
+    lidar_tf = Node(
         name='lidar_tf',
         package='tf2_ros',
         executable='static_transform_publisher',
         arguments=['0','0','0','0','0','0','1','odom','velodyne']
         )
     
-    imu_tf = launch_ros.actions.Node(
+    imu_tf = Node(
         name='imu_tf',
         package='tf2_ros',
         executable='static_transform_publisher',
         arguments=['0','0','0','0','0','0','1','odom','imu_link']
         )
 
-    localization_param_dir = launch.substitutions.LaunchConfiguration(
-        'localization_param_dir',
-        default=os.path.join(
-            get_package_share_directory('pcl_localization_ros2'),
-            'param',
-            'localization.yaml'))
-    
-    pcl_localization = launch_ros.actions.LifecycleNode(
+    pcl_localization = LifecycleNode(
         name='pcl_localization',
         namespace='',
         package='pcl_localization_ros2',
@@ -90,36 +84,36 @@ def generate_launch_description():
         parameters=[localization_param_dir],
         output='screen')
 
-    to_inactive = launch.actions.EmitEvent(
-        event=launch_ros.events.lifecycle.ChangeState(
-            lifecycle_node_matcher=launch.events.matches_action(pcl_localization),
+    to_inactive = EmitEvent(
+        event=ChangeState(
+            lifecycle_node_matcher=matches_action(pcl_localization),
             transition_id=lifecycle_msgs.msg.Transition.TRANSITION_CONFIGURE,
         )
     )
     
-    from_unconfigured_to_inactive = launch.actions.RegisterEventHandler(
-        launch_ros.event_handlers.OnStateTransition(
+    from_unconfigured_to_inactive = RegisterEventHandler(
+        OnStateTransition(
             target_lifecycle_node=pcl_localization, 
             goal_state='unconfigured',
             entities=[
-                launch.actions.LogInfo(msg="-- Unconfigured --"),
-                launch.actions.EmitEvent(event=launch_ros.events.lifecycle.ChangeState(
-                    lifecycle_node_matcher=launch.events.matches_action(pcl_localization),
+                LogInfo(msg="-- Unconfigured --"),
+                EmitEvent(event=ChangeState(
+                    lifecycle_node_matcher=matches_action(pcl_localization),
                     transition_id=lifecycle_msgs.msg.Transition.TRANSITION_CONFIGURE,
                 )),
             ],
         )
     )
 
-    from_inactive_to_active = launch.actions.RegisterEventHandler(
-        launch_ros.event_handlers.OnStateTransition(
+    from_inactive_to_active = RegisterEventHandler(
+        OnStateTransition(
             target_lifecycle_node=pcl_localization, 
             start_state = 'configuring',
             goal_state='inactive',
             entities=[
-                launch.actions.LogInfo(msg="-- Inactive --"),
-                launch.actions.EmitEvent(event=launch_ros.events.lifecycle.ChangeState(
-                    lifecycle_node_matcher=launch.events.matches_action(pcl_localization),
+                LogInfo(msg="-- Inactive --"),
+                EmitEvent(event=ChangeState(
+                    lifecycle_node_matcher=matches_action(pcl_localization),
                     transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVATE,
                 )),
             ],
