@@ -83,7 +83,7 @@ CallbackReturn PCLLocalization::on_activate(const rclcpp_lifecycle::State &)
     pcl::toROSMsg(*map_cloud_ptr, *map_msg_ptr);
     map_msg_ptr->header.frame_id = global_frame_id_;
     initial_map_pub_->publish(*map_msg_ptr);
-    RCLCPP_INFO(get_logger(), "Initil Map Published");
+    RCLCPP_INFO(get_logger(), "Initial Map Published");
 
     if (registration_method_ == "GICP") {
       pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>());
