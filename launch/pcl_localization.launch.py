@@ -23,12 +23,12 @@ def generate_launch_description():
     )
     cloud_topic_arg = DeclareLaunchArgument(
         'cloud_topic',
-        description='PointCloud2 topic',
+        description='Input PointCloud2 topic',
         default_value='/velodyne_points'
     )
     map_topic_arg = DeclareLaunchArgument(
         'map_topic',
-        description='PointCloud2 map topic',
+        description='Input PointCloud2 map topic',
         default_value='/map'
     )
     initial_pose_topic_arg = DeclareLaunchArgument(
@@ -38,13 +38,28 @@ def generate_launch_description():
     )
     odom_topic_arg = DeclareLaunchArgument(
         'odom_topic',
-        description='Odometry topic',
+        description='Input Odometry topic',
         default_value='/odom'
     )
     imu_topic_arg = DeclareLaunchArgument(
         'imu_topic',
-        description='IMU topic',
+        description='Input IMU topic',
         default_value='/imu/data'
+    )
+    pcl_pose_topic_arg = DeclareLaunchArgument(
+        'pcl_pose_topic',
+        description='Output Pose topic',
+        default_value='/pcl_pose'
+    )
+    path_topic_arg = DeclareLaunchArgument(
+        'path_topic',
+        description='Output Path topic',
+        default_value='/path'
+    )
+    initial_map_topic_arg = DeclareLaunchArgument(
+        'initial_map_topic',
+        description='Output Initial Map topic',
+        default_value='/initial_map'
     )
 
     node_name = LaunchConfiguration('node_name')
@@ -53,6 +68,9 @@ def generate_launch_description():
     initial_pose_topic = LaunchConfiguration('initial_pose_topic')
     odom_topic = LaunchConfiguration('odom_topic')
     imu_topic = LaunchConfiguration('imu_topic')
+    pcl_pose_topic = LaunchConfiguration('pcl_pose_topic')
+    path_topic = LaunchConfiguration('path_topic')
+    initial_map_topic = LaunchConfiguration('initial_map_topic')
 
     localization_param_dir = LaunchConfiguration(
         'localization_param_dir',
@@ -71,7 +89,10 @@ def generate_launch_description():
                     ('/map', map_topic),
                     ('/initial_pose', initial_pose_topic),
                     ('/odom', odom_topic),
-                    ('/imu', imu_topic)],
+                    ('/imu', imu_topic),
+                    ('/pcl_pose', pcl_pose_topic),
+                    ('/path', path_topic),
+                    ('/initial_map', initial_map_topic)],
         parameters=[localization_param_dir],
         output='screen')
 
@@ -116,6 +137,9 @@ def generate_launch_description():
     ld.add_action(initial_pose_topic_arg)
     ld.add_action(odom_topic_arg)
     ld.add_action(imu_topic_arg)
+    ld.add_action(pcl_pose_topic_arg)
+    ld.add_action(path_topic_arg)
+    ld.add_action(initial_map_topic_arg)
 
     ld.add_action(from_unconfigured_to_inactive)
     ld.add_action(from_inactive_to_active)
