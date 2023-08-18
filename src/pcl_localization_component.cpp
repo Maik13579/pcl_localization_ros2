@@ -469,20 +469,20 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
     Eigen::Matrix4f tf_matrix = tf_affine.matrix().cast<float>();
 
     // Combine the transformations
-    Eigen::Matrix4f final_transformation_with_init_transform = registration_->getFinalTransformation();
-    final_transformation_with_init_transform = final_transformation_with_init_transform * tf_matrix;
+    Eigen::Matrix4f final_transformation_with_odom_transform = registration_->getFinalTransformation();
+    final_transformation_with_odom_transform = final_transformation_with_odom_transform * tf_matrix;
 
     // update Rotation
-    Eigen::Matrix3d rot_mat_final = final_transformation_with_init_transform.block<3, 3>(0, 0).cast<double>();
+    Eigen::Matrix3d rot_mat_final = final_transformation_with_odom_transform.block<3, 3>(0, 0).cast<double>();
     Eigen::Quaterniond quat_eig_final(rot_mat_final);
     geometry_msgs::msg::Quaternion quat_msg_final = tf2::toMsg(quat_eig_final);
 
     // Create updated pose message
     geometry_msgs::msg::PoseStamped corrent_pose_stamped_transformed_;
     corrent_pose_stamped_transformed_.header.stamp = msg->header.stamp;
-    corrent_pose_stamped_transformed_.pose.position.x = static_cast<double>(final_transformation_with_init_transform(0, 3));
-    corrent_pose_stamped_transformed_.pose.position.y = static_cast<double>(final_transformation_with_init_transform(1, 3));
-    corrent_pose_stamped_transformed_.pose.position.z = static_cast<double>(final_transformation_with_init_transform(2, 3));
+    corrent_pose_stamped_transformed_.pose.position.x = static_cast<double>(final_transformation_with_odom_transform(0, 3));
+    corrent_pose_stamped_transformed_.pose.position.y = static_cast<double>(final_transformation_with_odom_transform(1, 3));
+    corrent_pose_stamped_transformed_.pose.position.z = static_cast<double>(final_transformation_with_odom_transform(2, 3));
     corrent_pose_stamped_transformed_.pose.orientation = quat_msg_final;
 
     // Publish the updated pose
