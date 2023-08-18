@@ -467,6 +467,11 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
 
       // Combine the transformations
       final_transformation = tf_matrix * final_transformation;
+
+      // update Rotation
+      Eigen::Matrix3d rot_mat = final_transformation.block<3, 3>(0, 0).cast<double>();
+      Eigen::Quaterniond quat_eig(rot_mat);
+      geometry_msgs::msg::Quaternion quat_msg = tf2::toMsg(quat_eig);
   }
 
   corrent_pose_stamped_.header.stamp = msg->header.stamp;
