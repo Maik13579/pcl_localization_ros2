@@ -404,9 +404,9 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
   sensor_msgs::msg::PointCloud2 transformed_cloud;
   try {
     if (use_odom_tf_) { // transform to odom frame
-      tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, odom_frame_id_, tf2::TimePointZero);
+      tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, odom_frame_id_, tf2::durationFromSec(0.2));
     } else { // transform to base_link frame
-      tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, base_frame_id_, tf2::TimePointZero);
+      tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, base_frame_id_, tf2::durationFromSec(0.2));
     }
   } catch (tf2::TransformException &ex) {
     std::cout << "Failed to lookup transform" << std::endl;
@@ -456,7 +456,7 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
     // Get the transformation from odom frame to the base_link_frame
     geometry_msgs::msg::TransformStamped tf_transform;
     try {
-        tf_transform = tfbuffer_.lookupTransform(odom_frame_id_, base_frame_id_, msg->header.stamp, tf2::TimePointZero);
+        tf_transform = tfbuffer_.lookupTransform(odom_frame_id_, base_frame_id_, msg->header.stamp, tf2::durationFromSec(0.2));
     } catch (tf2::TransformException &ex) {
         RCLCPP_WARN(get_logger(), "%s", ex.what());
         return;
