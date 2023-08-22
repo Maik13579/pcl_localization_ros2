@@ -397,26 +397,25 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
     }
   }
 
-  if (use_odom_tf_) {
-    // Transform the filtered and pruned point cloud into the odom frame.
-    sensor_msgs::msg::PointCloud2 pruned_cloud_ros;
-    pcl::toROSMsg(tmp, pruned_cloud_ros);
-    sensor_msgs::msg::PointCloud2 transformed_cloud;
-    try {
-      pruned_cloud_ros.header.frame_id = msg->header.frame_id; //Set the header of the pointcloud to the original frame
+  // Transform point cloud to base_link or odom
+  sensor_msgs::msg::PointCloud2 pruned_cloud_ros;
+  pcl::toROSMsg(tmp, pruned_cloud_ros);
+  pruned_cloud_ros.header.frame_id = msg->header.frame_id; //Set the header of the pointcloud to the original frame
+  sensor_msgs::msg::PointCloud2 transformed_cloud;
+  try {
+    if (use_odom_tf_) { // transform to odom frame
       tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, odom_frame_id_, tf2::durationFromSec(0.1));
-    } catch (tf2::TransformException &ex) {
-      RCLCPP_WARN(get_logger(), "%s", ex.what());
-      return;
+    } else { // transform to base_link frame
+      tfbuffer_.transform(pruned_cloud_ros, transformed_cloud, base_frame_id_, tf2::durationFromSec(0.1));
     }
-    pcl::PointCloud<pcl::PointXYZI>::Ptr transformed_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>());
-    pcl::fromROSMsg(transformed_cloud, *transformed_cloud_ptr);
-    registration_->setInputSource(transformed_cloud_ptr);
-
-  } else {
-    pcl::PointCloud<pcl::PointXYZI>::Ptr tmp_ptr(new pcl::PointCloud<pcl::PointXYZI>(tmp));
-    registration_->setInputSource(tmp_ptr);
+  } catch (tf2::TransformException &ex) {
+    std::cout << "Failed to lookup transform" << std::endl;
+    RCLCPP_WARN(get_logger(), "Failed to lookup transform.");
+    return;
   }
+  pcl::PointCloud<pcl::PointXYZI>::Ptr transformed_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>());
+  pcl::fromROSMsg(transformed_cloud, *transformed_cloud_ptr);
+  registration_->setInputSource(transformed_cloud_ptr);
 
   Eigen::Affine3d affine;
   tf2::fromMsg(corrent_pose_stamped_.pose, affine);
