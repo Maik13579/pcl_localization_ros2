@@ -440,7 +440,7 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
   geometry_msgs::msg::TransformStamped transform_stamped;
   transform_stamped.header.stamp = msg->header.stamp;
   transform_stamped.header.frame_id = global_frame_id_;
-  transform_stamped.child_frame_id = odom_frame_id_;
+  transform_stamped.child_frame_id = odom_frame_id_; //if there is no odom this should be base_link
   transform_stamped.transform.translation.x = static_cast<double>(final_transformation(0, 3));
   transform_stamped.transform.translation.y = static_cast<double>(final_transformation(1, 3));
   transform_stamped.transform.translation.z = static_cast<double>(final_transformation(2, 3));
@@ -454,10 +454,10 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
   corrent_pose_stamped_.pose.orientation = quat_msg;
 
   if (use_odom_tf_) {
-    // Get the transformation from odom frame to the original frame
+    // Get the transformation from odom frame to the base_link_frame
     geometry_msgs::msg::TransformStamped tf_transform;
     try {
-        tf_transform = tfbuffer_.lookupTransform(odom_frame_id_, msg->header.frame_id, msg->header.stamp, tf2::durationFromSec(0.1));
+        tf_transform = tfbuffer_.lookupTransform(odom_frame_id_, base_frame_id_, msg->header.stamp, tf2::durationFromSec(0.1));
     } catch (tf2::TransformException &ex) {
         RCLCPP_WARN(get_logger(), "%s", ex.what());
         return;
@@ -479,6 +479,7 @@ void PCLLocalization::cloudReceived(sensor_msgs::msg::PointCloud2::ConstSharedPt
 
     // Create updated pose message
     geometry_msgs::msg::PoseStamped corrent_pose_stamped_transformed_;
+    corrent_pose_stamped_transformed_.header.frame_id = global_frame_id_;
     corrent_pose_stamped_transformed_.header.stamp = msg->header.stamp;
     corrent_pose_stamped_transformed_.pose.position.x = static_cast<double>(final_transformation_with_odom_transform(0, 3));
     corrent_pose_stamped_transformed_.pose.position.y = static_cast<double>(final_transformation_with_odom_transform(1, 3));
